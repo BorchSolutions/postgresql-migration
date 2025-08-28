@@ -128,11 +128,13 @@ dotnet run migrate --dry-run [--connection <name>]
 
 ```bash
 # Extraer datos de tablas específicas
-dotnet run data extract --tables "table1,table2,table3" [--output <path>] [--connection <name>]
+dotnet run data extract --tables "table1,table2,table3" [--output <path>] [--connection <name>] [--mark-as-executed]
 
 # Verificar existencia y contenido de tablas
 dotnet run data test --tables "table1,table2" [--connection <name>]
 ```
+
+**Parámetro `--mark-as-executed`**: Cuando se especifica, el script extraído se registra automáticamente como ejecutado en la tabla `borchsolutions_data_migrations`. Esto es útil para bases de datos existentes donde los datos ya están presentes y no necesitas ejecutar el script, pero sí registrar que esa migración "conceptualmente" ya se aplicó.
 
 ### **📁 Control de Cambios**
 
@@ -227,8 +229,8 @@ dotnet run baseline generate --output "Migrations/Schema/V000_001__Initial_Basel
 # 3. Marcar baseline como ejecutado
 dotnet run baseline mark
 
-# 4. Extraer datos maestros existentes (opcional)
-dotnet run data extract --tables "roles,permissions,countries" --output "Migrations/Data/D000_001__Existing_Data.sql"
+# 4. Extraer datos maestros existentes Y marcarlos como ejecutados
+dotnet run data extract --tables "roles,permissions,countries" --output "Migrations/Data/D000_001__Existing_Data.sql" --mark-as-executed
 
 # 5. A partir de aquí, workflow normal para nuevos cambios
 dotnet run migrate --dry-run
@@ -401,6 +403,20 @@ dotnet run data test --tables "users,roles,permissions"
 # ✅ Verificación completada
 ```
 
+### **Extracción de Datos con Registro**
+
+```bash
+# Extraer datos y marcar como ejecutado (para BD existentes)
+dotnet run data extract --tables "roles,permissions" --output "Migrations/Data/D000_001__Master_Data.sql" --mark-as-executed
+
+# Salida esperada:
+# 🗃️  Extrayendo datos de 2 tablas para conexión: Default
+# 📋 Tablas: roles, permissions
+# 💾 Datos exportados a: Migrations/Data/D000_001__Master_Data.sql
+# ✅ Script de datos marcado como ejecutado en la base de datos
+# ✅ Extracción de datos completada
+```
+
 ### **Validación de Integridad**
 
 ```bash
@@ -434,8 +450,8 @@ dotnet run migrate --dry-run                          # Verificar migraciones pe
 dotnet run migrate --connection Staging               # Ejecutar migraciones en Staging
 
 # DATOS
-dotnet run data extract --tables "tabla1,tabla2"     # Extraer datos de tablas
-dotnet run data test --tables "tabla1,tabla2"        # Verificar tablas
+dotnet run data extract --tables "tabla1,tabla2" --mark-as-executed     # Extraer y registrar datos de tablas
+dotnet run data test --tables "tabla1,tabla2"                           # Verificar tablas
 
 # CONTROL DE CAMBIOS
 dotnet run control init --path "./Migrations"         # Inicializar control
