@@ -155,12 +155,14 @@ class Program
         var dataExtractCommand = new Command("extract", "Extraer datos de tablas");
         var tablesOption = new Option<string[]>("--tables", "Lista de tablas a extraer (separadas por coma)") { IsRequired = true };
         var dataOutputOption = new Option<string?>("--output", "Archivo de salida para el script de datos");
+        var markAsExecutedOption = new Option<bool>("--mark-as-executed", "Marcar el script extraído como ya ejecutado en la BD") { IsRequired = false };
         dataExtractCommand.AddOption(tablesOption);
         dataExtractCommand.AddOption(dataOutputOption);
-        dataExtractCommand.SetHandler(async (string? connection, string[] tables, string? output, bool verbose) =>
+        dataExtractCommand.AddOption(markAsExecutedOption);
+        dataExtractCommand.SetHandler(async (string? connection, string[] tables, string? output, bool markAsExecuted, bool verbose) =>
         {
-            await HandleDataExtractAsync(connection, tables, output, verbose);
-        }, connectionOption, tablesOption, dataOutputOption, verboseOption);
+            await HandleDataExtractAsync(connection, tables, output, markAsExecuted, verbose);
+        }, connectionOption, tablesOption, dataOutputOption, markAsExecutedOption, verboseOption);
 
         var dataTestCommand = new Command("test", "Verificar existencia y contenido de tablas");
         var testTablesOption = new Option<string[]>("--tables", "Lista de tablas a verificar (separadas por coma)") { IsRequired = true };
@@ -397,9 +399,10 @@ class Program
         }
     }
 
-    private static async Task HandleDataExtractAsync(string? connection, string[] tables, string? output, bool verbose)
+    private static async Task HandleDataExtractAsync(string? connection, string[] tables, string? output, bool markAsExecuted, bool verbose)
     {
         var dataExtractor = GetService<IDataExtractor>();
+        var migrationEngine = GetService<IMigrationEngine>();
         
         var tableList = tables.SelectMany(t => t.Split(',')).Select(t => t.Trim()).ToList();
         
@@ -414,6 +417,27 @@ class Program
             return;
         }
         
+        // Crear objeto MigrationScript para registro si se requiere
+        MigrationScript? migrationScript = null;
+        if (markAsExecuted)
+        {
+            var fileName = Path.GetFileNameWithoutExtension(output ?? "D000_001__Existing_Data");
+            var version = ExtractVersionFromFileName(fileName) ?? "D000_001";
+            var description = ExtractDescriptionFromFileName(fileName) ?? "Existing_Data";
+            
+            migrationScript = new MigrationScript
+            {
+                Version = version,
+                Name = fileName,
+                Description = description,
+                Content = script,
+                Type = MigrationScriptType.Data,
+                Checksum = CalculateChecksum(script),
+                CreatedAt = DateTime.UtcNow,
+                Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"
+            };
+        }
+        
         if (!string.IsNullOrEmpty(output))
         {
             var directory = Path.GetDirectoryName(output);
@@ -424,11 +448,30 @@ class Program
             
             await File.WriteAllTextAsync(output, script);
             Console.WriteLine($"💾 Datos exportados a: {output}");
+            
+            if (migrationScript != null)
+            {
+                migrationScript.FilePath = output;
+            }
         }
         else
         {
             Console.WriteLine("📄 Script generado:");
             Console.WriteLine(script);
+        }
+        
+        // Marcar como ejecutado si se solicita
+        if (markAsExecuted && migrationScript != null)
+        {
+            var markResult = await migrationEngine.MarkMigrationAsExecutedAsync(migrationScript, connection);
+            if (markResult)
+            {
+                Console.WriteLine("✅ Script de datos marcado como ejecutado en la base de datos");
+            }
+            else
+            {
+                Console.WriteLine("⚠️  Error marcando script de datos como ejecutado");
+            }
         }
         
         Console.WriteLine("✅ Extracción de datos completada");
@@ -685,6 +728,30 @@ class Program
         {
             Console.WriteLine("⚠️  Validación completada - Se encontraron problemas de integridad");
         }
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private static string? ExtractVersionFromFileName(string fileName)
+    {
+        var versionMatch = System.Text.RegularExpressions.Regex.Match(fileName, @"^([VD]\d{3}_\d{3})__(.+)$");
+        return versionMatch.Success ? versionMatch.Groups[1].Value : null;
+    }
+
+    private static string? ExtractDescriptionFromFileName(string fileName)
+    {
+        var versionMatch = System.Text.RegularExpressions.Regex.Match(fileName, @"^([VD]\d{3}_\d{3})__(.+)$");
+        return versionMatch.Success ? versionMatch.Groups[2].Value.Replace('_', ' ') : null;
+    }
+
+    private static string CalculateChecksum(string content)
+    {
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+        var hash = sha256.ComputeHash(bytes);
+        return Convert.ToBase64String(hash);
     }
 
     #endregion
