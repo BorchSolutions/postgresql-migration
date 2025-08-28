@@ -27,7 +27,6 @@ public class DataExtractor : IDataExtractor
 {
     private readonly IConnectionManager _connectionManager;
     private readonly ILogger<DataExtractor> _logger;
-    private readonly int _defaultMaxRows = 10000;
     private readonly int _batchSize = 1000;
 
     public DataExtractor(IConnectionManager connectionManager, ILogger<DataExtractor> logger)
@@ -222,9 +221,9 @@ public class DataExtractor : IDataExtractor
                 
                 while (await reader.ReadAsync())
                 {
-                    var columnName = reader.GetString("column_name");
-                    var dataType = reader.GetString("data_type");
-                    var maxLength = reader.IsDBNull("character_maximum_length") ? (int?)null : reader.GetInt32("character_maximum_length");
+                    var columnName = reader["column_name"].ToString();
+                    var dataType = reader["data_type"].ToString();
+                    var maxLength = reader["character_maximum_length"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["character_maximum_length"]);
                     
                     tableInfo.Columns.Add(columnName);
                     
@@ -252,7 +251,7 @@ public class DataExtractor : IDataExtractor
                 
                 while (await pkReader.ReadAsync())
                 {
-                    tableInfo.PrimaryKeyColumns.Add(pkReader.GetString("column_name"));
+                    tableInfo.PrimaryKeyColumns.Add(pkReader["column_name"].ToString());
                 }
             }
 

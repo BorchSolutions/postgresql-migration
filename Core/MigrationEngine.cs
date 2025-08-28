@@ -132,7 +132,7 @@ public class MigrationEngine : IMigrationEngine
                     
                     return true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     await transaction.RollbackAsync();
                     throw;
@@ -406,7 +406,6 @@ public class MigrationEngine : IMigrationEngine
         var commands = new List<string>();
         var currentCommand = new StringBuilder();
         var inString = false;
-        var inComment = false;
         
         var lines = script.Split('\n');
         
@@ -567,16 +566,16 @@ public class MigrationEngine : IMigrationEngine
         {
             var migration = new MigrationScript
             {
-                Version = reader.GetString("version"),
-                Name = reader.GetString("name"),
-                Description = reader.GetString("description"),
+                Version = reader["version"].ToString(),
+                Name = reader["name"].ToString(),
+                Description = reader["description"].ToString(),
                 Type = type,
-                Checksum = reader.GetString("checksum"),
-                ExecutedAt = reader.GetDateTime("executed_at"),
-                ExecutionTimeMs = reader.GetInt32("execution_time_ms"),
-                AffectedRows = reader.GetInt32("affected_rows"),
-                Environment = reader.GetString("environment"),
-                Status = reader.GetBoolean("success") ? MigrationStatus.Completed : MigrationStatus.Failed
+                Checksum = reader["checksum"].ToString(),
+                ExecutedAt = Convert.ToDateTime(reader["executed_at"]),
+                ExecutionTimeMs = Convert.ToInt32(reader["execution_time_ms"]),
+                AffectedRows = Convert.ToInt32(reader["affected_rows"]),
+                Environment = reader["environment"].ToString(),
+                Status = Convert.ToBoolean(reader["success"]) ? MigrationStatus.Completed : MigrationStatus.Failed
             };
 
             migrations.Add(migration);

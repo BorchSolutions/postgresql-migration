@@ -228,8 +228,8 @@ public class SchemaInspector : ISchemaInspector
             
             while (await constraintReader.ReadAsync())
             {
-                var constraintType = constraintReader.GetString("constraint_type");
-                var columns_list = constraintReader.GetString("columns");
+                var constraintType = constraintReader["constraint_type"].ToString();
+                var columns_list = constraintReader["columns"].ToString();
                 
                 var constraintDef = constraintType switch
                 {
@@ -257,11 +257,11 @@ public class SchemaInspector : ISchemaInspector
 
     private string GenerateColumnDefinition(NpgsqlDataReader reader)
     {
-        var columnName = reader.GetString("column_name");
-        var dataType = reader.GetString("data_type");
-        var maxLength = reader.IsDBNull("character_maximum_length") ? (int?)null : reader.GetInt32("character_maximum_length");
-        var isNullable = reader.GetString("is_nullable") == "YES";
-        var defaultValue = reader.IsDBNull("column_default") ? null : reader.GetString("column_default");
+        var columnName = reader["column_name"].ToString();
+        var dataType = reader["data_type"].ToString();
+        var maxLength = reader["character_maximum_length"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["character_maximum_length"]);
+        var isNullable = reader["is_nullable"].ToString() == "YES";
+        var defaultValue = reader["column_default"] == DBNull.Value ? null : reader["column_default"].ToString();
 
         var columnDef = $"{columnName} ";
 
@@ -305,8 +305,8 @@ public class SchemaInspector : ISchemaInspector
 
     private string GetNumericType(NpgsqlDataReader reader)
     {
-        var precision = reader.IsDBNull("numeric_precision") ? (int?)null : reader.GetInt32("numeric_precision");
-        var scale = reader.IsDBNull("numeric_scale") ? (int?)null : reader.GetInt32("numeric_scale");
+        var precision = reader["numeric_precision"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["numeric_precision"]);
+        var scale = reader["numeric_scale"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["numeric_scale"]);
         
         if (precision.HasValue && scale.HasValue)
         {
@@ -339,8 +339,8 @@ public class SchemaInspector : ISchemaInspector
         
         while (await reader.ReadAsync())
         {
-            var indexName = reader.GetString("indexname");
-            var indexDef = reader.GetString("indexdef");
+            var indexName = reader["indexname"].ToString();
+            var indexDef = reader["indexdef"].ToString();
             
             // Modificar para usar IF NOT EXISTS
             indexDef = indexDef.Replace("CREATE INDEX", "CREATE INDEX IF NOT EXISTS");
@@ -376,8 +376,8 @@ public class SchemaInspector : ISchemaInspector
         
         while (await reader.ReadAsync())
         {
-            var functionName = reader.GetString("function_name");
-            var functionDef = reader.GetString("function_definition");
+            var functionName = reader["function_name"].ToString();
+            var functionDef = reader["function_definition"].ToString();
             
             functions.Add(new SchemaObject
             {
@@ -411,11 +411,11 @@ public class SchemaInspector : ISchemaInspector
         
         while (await reader.ReadAsync())
         {
-            var triggerName = reader.GetString("trigger_name");
-            var manipulation = reader.GetString("event_manipulation");
-            var table = reader.GetString("event_object_table");
-            var timing = reader.GetString("action_timing");
-            var statement = reader.GetString("action_statement");
+            var triggerName = reader["trigger_name"].ToString();
+            var manipulation = reader["event_manipulation"].ToString();
+            var table = reader["event_object_table"].ToString();
+            var timing = reader["action_timing"].ToString();
+            var statement = reader["action_statement"].ToString();
 
             var createTrigger = $@"CREATE OR REPLACE TRIGGER {triggerName}
     {timing} {manipulation} ON {table}
@@ -454,11 +454,11 @@ public class SchemaInspector : ISchemaInspector
         
         while (await reader.ReadAsync())
         {
-            var sequenceName = reader.GetString("sequence_name");
-            var startValue = reader.GetString("start_value");
-            var minValue = reader.GetString("minimum_value");
-            var maxValue = reader.GetString("maximum_value");
-            var increment = reader.GetString("increment");
+            var sequenceName = reader["sequence_name"].ToString();
+            var startValue = reader["start_value"].ToString();
+            var minValue = reader["minimum_value"].ToString();
+            var maxValue = reader["maximum_value"].ToString();
+            var increment = reader["increment"].ToString();
 
             var createSeq = $@"CREATE SEQUENCE IF NOT EXISTS {sequenceName}
     START WITH {startValue}
@@ -495,8 +495,8 @@ public class SchemaInspector : ISchemaInspector
         
         while (await reader.ReadAsync())
         {
-            var viewName = reader.GetString("table_name");
-            var viewDef = reader.GetString("view_definition");
+            var viewName = reader["table_name"].ToString();
+            var viewDef = reader["view_definition"].ToString();
 
             var createView = $"CREATE OR REPLACE VIEW {viewName} AS\n{viewDef};";
 
