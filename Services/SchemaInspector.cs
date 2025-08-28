@@ -135,21 +135,24 @@ public class SchemaInspector : ISchemaInspector
         
         tableQuery += " ORDER BY table_name";
 
-        using var cmd = new NpgsqlCommand(tableQuery, connection);
-        if (!string.IsNullOrEmpty(specificTable))
-        {
-            cmd.Parameters.AddWithValue("@tableName", specificTable);
-        }
-
-        using var reader = await cmd.ExecuteReaderAsync();
         var tableNames = new List<string>();
         
-        while (await reader.ReadAsync())
+        // Primero obtener todos los nombres de tabla
+        using (var cmd = new NpgsqlCommand(tableQuery, connection))
         {
-            tableNames.Add(reader.GetString(0));
+            if (!string.IsNullOrEmpty(specificTable))
+            {
+                cmd.Parameters.AddWithValue("@tableName", specificTable);
+            }
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                tableNames.Add(reader.GetString(0));
+            }
         }
 
-        // Para cada tabla, generar el CREATE TABLE
+        // Luego generar el CREATE TABLE para cada tabla
         foreach (var tableName in tableNames)
         {
             var createScript = await GenerateCreateTableScriptAsync(connection, tableName);
