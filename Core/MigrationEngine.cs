@@ -302,19 +302,32 @@ public class MigrationEngine : IMigrationEngine
 
         // Cargar scripts de esquema
         var schemaPath = Path.Combine(_config.MigrationsPath, _config.SchemaPath);
+        _logger.LogDebug("🔍 Buscando scripts de esquema en: {SchemaPath}", schemaPath);
+        
         if (Directory.Exists(schemaPath))
         {
             var schemaFiles = Directory.GetFiles(schemaPath, "*.sql", SearchOption.AllDirectories)
                 .OrderBy(f => f);
 
+            _logger.LogDebug("📁 Archivos de esquema encontrados: {Count}", schemaFiles.Count());
             foreach (var file in schemaFiles)
             {
+                _logger.LogDebug("🔍 Procesando archivo: {FileName}", Path.GetFileName(file));
                 var migration = await LoadMigrationScriptFromFileAsync(file, MigrationScriptType.Schema);
                 if (migration != null)
                 {
+                    _logger.LogDebug("✅ Script cargado: {Version} - {Description}", migration.Version, migration.Description);
                     migrations.Add(migration);
                 }
+                else
+                {
+                    _logger.LogDebug("❌ Script rechazado: {FileName}", Path.GetFileName(file));
+                }
             }
+        }
+        else
+        {
+            _logger.LogWarning("⚠️  Directorio de esquema no existe: {SchemaPath}", schemaPath);
         }
 
         // Cargar scripts de datos
@@ -342,13 +355,17 @@ public class MigrationEngine : IMigrationEngine
         try
         {
             var fileName = Path.GetFileNameWithoutExtension(filePath);
+            _logger.LogDebug("🔍 Verificando nombre de archivo: '{FileName}'", fileName);
             var versionMatch = Regex.Match(fileName, @"^([VD]\d{3}_\d{3})__(.+)$");
             
             if (!versionMatch.Success)
             {
-                _logger.LogWarning("⚠️  Nombre de archivo no válido: {FileName}", fileName);
+                _logger.LogWarning("⚠️  Nombre de archivo no válido: '{FileName}' - No coincide con patrón [VD]###_###__Description", fileName);
                 return null;
             }
+            
+            _logger.LogDebug("✅ Nombre válido - Version: {Version}, Description: {Description}", 
+                versionMatch.Groups[1].Value, versionMatch.Groups[2].Value);
 
             var version = versionMatch.Groups[1].Value;
             var description = versionMatch.Groups[2].Value.Replace('_', ' ');
