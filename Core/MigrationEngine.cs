@@ -443,7 +443,7 @@ public class MigrationEngine : IMigrationEngine
         int affectedRows, 
         NpgsqlTransaction? transaction = null)
     {
-        var tableName = migration.Type == MigrationScriptType.Schema ? 
+        var tableName = migration.Type == MigrationScriptType.Schema || migration.Type == MigrationScriptType.Baseline ? 
             _config.SchemaTable : _config.DataTable;
 
         var query = $@"
@@ -522,7 +522,8 @@ public class MigrationEngine : IMigrationEngine
 
     private async Task<List<MigrationScript>> GetExecutedSchemaMigrationsAsync(NpgsqlConnection connection)
     {
-        return await GetExecutedMigrationsFromTableAsync(connection, _config.SchemaTable, MigrationScriptType.Schema);
+        // Obtener todas las migraciones de la tabla de esquema (incluye Schema y Baseline)
+        return await GetAllMigrationsFromTableAsync(connection, _config.SchemaTable);
     }
 
     private async Task<List<MigrationScript>> GetExecutedDataMigrationsAsync(NpgsqlConnection connection)
@@ -568,6 +569,67 @@ public class MigrationEngine : IMigrationEngine
             {
                 Version = reader["version"].ToString(),
                 Name = reader["name"].ToString(),
+                Description = reader["description"].ToString(),
+                Type = type,
+                Checksum = reader["checksum"].ToString(),
+                ExecutedAt = Convert.ToDateTime(reader["executed_at"]),
+                ExecutionTimeMs = Convert.ToInt32(reader["execution_time_ms"]),
+                AffectedRows = Convert.ToInt32(reader["affected_rows"]),
+                Environment = reader["environment"].ToString(),
+                Status = Convert.ToBoolean(reader["success"]) ? MigrationStatus.Completed : MigrationStatus.Failed
+            };
+
+            migrations.Add(migration);
+        }
+
+        return migrations;
+    }
+
+    private async Task<List<MigrationScript>> GetAllMigrationsFromTableAsync(NpgsqlConnection connection, string tableName)
+    {
+        var migrations = new List<MigrationScript>();
+
+        // Verificar si la tabla existe
+        var tableExistsQuery = @"
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = @tableName
+            )";
+
+        using var existsCommand = new NpgsqlCommand(tableExistsQuery, connection);
+        existsCommand.Parameters.AddWithValue("@tableName", tableName);
+        
+        var tableExists = (bool)(await existsCommand.ExecuteScalarAsync() ?? false);
+        if (!tableExists)
+        {
+            return migrations;
+        }
+
+        var query = $@"
+            SELECT version, name, description, checksum, executed_at, execution_time_ms, affected_rows, environment, success
+            FROM {tableName}
+            ORDER BY executed_at";
+
+        using var command = new NpgsqlCommand(query, connection);
+        using var reader = await command.ExecuteReaderAsync();
+
+        while (await reader.ReadAsync())
+        {
+            var version = reader["version"].ToString();
+            var name = reader["name"].ToString();
+            
+            // Determinar el tipo basándose en la versión/nombre
+            var type = MigrationScriptType.Schema; // Default
+            if (version?.StartsWith("V000_001") == true || name?.Contains("Baseline") == true)
+            {
+                type = MigrationScriptType.Baseline;
+            }
+
+            var migration = new MigrationScript
+            {
+                Version = version,
+                Name = name,
                 Description = reader["description"].ToString(),
                 Type = type,
                 Checksum = reader["checksum"].ToString(),
