@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "cm0Q3MKGXdg=",
+  "dgSpecHash": "eKy1YEokLRQ=",
   "success": true,
-  "projectFilePath": "/home/bryan/Desktop/BorchSolutions.PostgreSQL.Migration/BorchSolutions.PostgreSQL.Migration.csproj",
+  "projectFilePath": "/home/bryan/repos/postgresql-migration/BorchSolutions.PostgreSQL.Migration.csproj",
   "expectedPackageFiles": [
     "/home/bryan/.nuget/packages/microsoft.extensions.configuration/8.0.0/microsoft.extensions.configuration.8.0.0.nupkg.sha512",
     "/home/bryan/.nuget/packages/microsoft.extensions.configuration.abstractions/8.0.0/microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",

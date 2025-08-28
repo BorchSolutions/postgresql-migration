@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/bryan/Desktop/BorchSolutions.PostgreSQL.Migration/BorchSolutions.PostgreSQL.Migration.csproj": {}
+    "/home/bryan/repos/postgresql-migration/BorchSolutions.PostgreSQL.Migration.csproj": {}
   },
   "projects": {
-    "/home/bryan/Desktop/BorchSolutions.PostgreSQL.Migration/BorchSolutions.PostgreSQL.Migration.csproj": {
+    "/home/bryan/repos/postgresql-migration/BorchSolutions.PostgreSQL.Migration.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/bryan/Desktop/BorchSolutions.PostgreSQL.Migration/BorchSolutions.PostgreSQL.Migration.csproj",
+        "projectUniqueName": "/home/bryan/repos/postgresql-migration/BorchSolutions.PostgreSQL.Migration.csproj",
         "projectName": "BorchSolutions.PostgreSQL.Migration",
-        "projectPath": "/home/bryan/Desktop/BorchSolutions.PostgreSQL.Migration/BorchSolutions.PostgreSQL.Migration.csproj",
+        "projectPath": "/home/bryan/repos/postgresql-migration/BorchSolutions.PostgreSQL.Migration.csproj",
         "packagesPath": "/home/bryan/.nuget/packages/",
-        "outputPath": "/home/bryan/Desktop/BorchSolutions.PostgreSQL.Migration/obj/",
+        "outputPath": "/home/bryan/repos/postgresql-migration/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/bryan/.nuget/NuGet/NuGet.Config"

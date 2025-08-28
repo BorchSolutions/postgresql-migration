@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Herramienta profesional para migraciones de bases de datos PostgreSQL")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bcae36c9a461a198b1fd1419e4a687fa3dbf3247")]
 [assembly: System.Reflection.AssemblyProductAttribute("PostgreSQL Migration Tool")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BorchSolutions.PostgreSQL.Migration")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0")]
