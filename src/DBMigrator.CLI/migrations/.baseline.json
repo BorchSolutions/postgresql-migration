@@ -1,0 +1,342 @@
+{
+  "Tables": [
+    {
+      "Name": "__migrations",
+      "Schema": "public",
+      "Columns": [
+        {
+          "Name": "id",
+          "DataType": "integer",
+          "IsNullable": false,
+          "DefaultValue": "nextval(\u0027__migrations_id_seq\u0027::regclass)",
+          "MaxLength": null,
+          "Precision": 32,
+          "Scale": 0,
+          "IsPrimaryKey": true,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 1
+        },
+        {
+          "Name": "migration_id",
+          "DataType": "character varying",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "MaxLength": 255,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 2
+        },
+        {
+          "Name": "filename",
+          "DataType": "character varying",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "MaxLength": 255,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 3
+        },
+        {
+          "Name": "checksum",
+          "DataType": "character varying",
+          "IsNullable": true,
+          "DefaultValue": null,
+          "MaxLength": 64,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 4
+        },
+        {
+          "Name": "applied_at",
+          "DataType": "timestamp without time zone",
+          "IsNullable": false,
+          "DefaultValue": "now()",
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 5
+        },
+        {
+          "Name": "applied_by",
+          "DataType": "character varying",
+          "IsNullable": true,
+          "DefaultValue": null,
+          "MaxLength": 100,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 6
+        }
+      ],
+      "Indexes": [
+        {
+          "Name": "__migrations_migration_id_key",
+          "TableName": "__migrations",
+          "Columns": [
+            "migration_id"
+          ],
+          "IsUnique": true,
+          "IsPrimary": false,
+          "IndexType": "btree",
+          "WhereClause": null
+        },
+        {
+          "Name": "__migrations_pkey",
+          "TableName": "__migrations",
+          "Columns": [
+            "id"
+          ],
+          "IsUnique": true,
+          "IsPrimary": true,
+          "IndexType": "btree",
+          "WhereClause": null
+        }
+      ],
+      "Comment": ""
+    },
+    {
+      "Name": "product",
+      "Schema": "public",
+      "Columns": [
+        {
+          "Name": "idproduct",
+          "DataType": "integer",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "MaxLength": null,
+          "Precision": 32,
+          "Scale": 0,
+          "IsPrimaryKey": true,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 1
+        },
+        {
+          "Name": "codigo",
+          "DataType": "character varying",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 2
+        },
+        {
+          "Name": "fecha",
+          "DataType": "time with time zone",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 3
+        }
+      ],
+      "Indexes": [
+        {
+          "Name": "product_pk",
+          "TableName": "product",
+          "Columns": [
+            "idproduct"
+          ],
+          "IsUnique": true,
+          "IsPrimary": true,
+          "IndexType": "btree",
+          "WhereClause": null
+        }
+      ],
+      "Comment": ""
+    },
+    {
+      "Name": "users",
+      "Schema": "public",
+      "Columns": [
+        {
+          "Name": "id",
+          "DataType": "integer",
+          "IsNullable": false,
+          "DefaultValue": "nextval(\u0027users_id_seq\u0027::regclass)",
+          "MaxLength": null,
+          "Precision": 32,
+          "Scale": 0,
+          "IsPrimaryKey": true,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 1
+        },
+        {
+          "Name": "name",
+          "DataType": "character varying",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "MaxLength": 100,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 2
+        },
+        {
+          "Name": "email",
+          "DataType": "character varying",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "MaxLength": 255,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 3
+        },
+        {
+          "Name": "created_at",
+          "DataType": "timestamp without time zone",
+          "IsNullable": true,
+          "DefaultValue": "now()",
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 4
+        }
+      ],
+      "Indexes": [
+        {
+          "Name": "users_email_key",
+          "TableName": "users",
+          "Columns": [
+            "email"
+          ],
+          "IsUnique": true,
+          "IsPrimary": false,
+          "IndexType": "btree",
+          "WhereClause": null
+        },
+        {
+          "Name": "users_pkey",
+          "TableName": "users",
+          "Columns": [
+            "id"
+          ],
+          "IsUnique": true,
+          "IsPrimary": true,
+          "IndexType": "btree",
+          "WhereClause": null
+        }
+      ],
+      "Comment": ""
+    },
+    {
+      "Name": "users_detalle",
+      "Schema": "public",
+      "Columns": [
+        {
+          "Name": "id",
+          "DataType": "integer",
+          "IsNullable": false,
+          "DefaultValue": "nextval(\u0027users_detalle_id_seq\u0027::regclass)",
+          "MaxLength": null,
+          "Precision": 32,
+          "Scale": 0,
+          "IsPrimaryKey": true,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 1
+        },
+        {
+          "Name": "namecompleto",
+          "DataType": "character varying",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "MaxLength": 100,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 2
+        },
+        {
+          "Name": "emailalterno",
+          "DataType": "character varying",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "MaxLength": 255,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 3
+        },
+        {
+          "Name": "created_at",
+          "DataType": "timestamp without time zone",
+          "IsNullable": true,
+          "DefaultValue": "now()",
+          "MaxLength": null,
+          "Precision": null,
+          "Scale": null,
+          "IsPrimaryKey": false,
+          "IsIdentity": false,
+          "Comment": "",
+          "OrdinalPosition": 4
+        }
+      ],
+      "Indexes": [
+        {
+          "Name": "users_detalle_emailalterno_key",
+          "TableName": "users_detalle",
+          "Columns": [
+            "emailalterno"
+          ],
+          "IsUnique": true,
+          "IsPrimary": false,
+          "IndexType": "btree",
+          "WhereClause": null
+        },
+        {
+          "Name": "users_detalle_pkey",
+          "TableName": "users_detalle",
+          "Columns": [
+            "id"
+          ],
+          "IsUnique": true,
+          "IsPrimary": true,
+          "IndexType": "btree",
+          "WhereClause": null
+        }
+      ],
+      "Comment": ""
+    }
+  ],
+  "Functions": [],
+  "SchemaName": "public",
+  "CapturedAt": "2025-09-28T14:05:21.8706629Z",
+  "ConnectionString": ""
+}

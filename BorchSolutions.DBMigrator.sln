@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5EC450D-44B7-4540-BB68-55FE52211D5D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBMigrator.CLI", "src\DBMigrator.CLI\DBMigrator.CLI.csproj", "{9172EA8F-41E1-44FF-B5DC-A99A5F8CAD43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBMigrator.Core", "src\DBMigrator.Core\DBMigrator.Core.csproj", "{099E280E-C95E-4D39-B963-5A492EA9FA18}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9172EA8F-41E1-44FF-B5DC-A99A5F8CAD43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9172EA8F-41E1-44FF-B5DC-A99A5F8CAD43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9172EA8F-41E1-44FF-B5DC-A99A5F8CAD43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9172EA8F-41E1-44FF-B5DC-A99A5F8CAD43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{099E280E-C95E-4D39-B963-5A492EA9FA18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{099E280E-C95E-4D39-B963-5A492EA9FA18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{099E280E-C95E-4D39-B963-5A492EA9FA18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{099E280E-C95E-4D39-B963-5A492EA9FA18}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9172EA8F-41E1-44FF-B5DC-A99A5F8CAD43} = {A5EC450D-44B7-4540-BB68-55FE52211D5D}
+		{099E280E-C95E-4D39-B963-5A492EA9FA18} = {A5EC450D-44B7-4540-BB68-55FE52211D5D}
+	EndGlobalSection
+EndGlobal

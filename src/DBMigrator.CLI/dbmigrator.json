@@ -1,0 +1,87 @@
+{
+  "environments": {
+    "development": {
+      "connectionString": "Host=localhost;Database=astara_dev;Username=postgres;Password=",
+      "environment": "development",
+      "migrationsPath": "./migrations",
+      "schemaTable": "__dbmigrator_schema_migrations",
+      "commandTimeout": 30,
+      "autoCreateMigrationTable": true,
+      "logging": {
+        "level": "Info",
+        "enableConsoleOutput": true,
+        "enableFileOutput": false,
+        "logFilePath": null,
+        "logPerformanceMetrics": true,
+        "logMigrationDetails": true
+      },
+      "backup": {
+        "autoBackupBeforeMigration": false,
+        "backupPath": "./backups",
+        "retentionDays": 7,
+        "compressBackups": true
+      },
+      "validation": {
+        "validateBeforeApply": true,
+        "requireDryRunForDestructive": false,
+        "checkConflictsBeforeApply": true,
+        "allowOutOfOrderMigrations": true,
+        "requiredApprovals": []
+      }
+    },
+    "production": {
+      "connectionString": "Host=localhost;Database=myapp_prod;Username=postgres;Password=",
+      "environment": "production",
+      "migrationsPath": "./migrations",
+      "schemaTable": "__dbmigrator_schema_migrations",
+      "commandTimeout": 30,
+      "autoCreateMigrationTable": true,
+      "logging": {
+        "level": "Warning",
+        "enableConsoleOutput": true,
+        "enableFileOutput": true,
+        "logFilePath": "./logs/dbmigrator-production.log",
+        "logPerformanceMetrics": true,
+        "logMigrationDetails": true
+      },
+      "backup": {
+        "autoBackupBeforeMigration": true,
+        "backupPath": "./backups",
+        "retentionDays": 90,
+        "compressBackups": true
+      },
+      "validation": {
+        "validateBeforeApply": true,
+        "requireDryRunForDestructive": true,
+        "checkConflictsBeforeApply": true,
+        "allowOutOfOrderMigrations": false,
+        "requiredApprovals": []
+      }
+    }
+  },
+  "defaultEnvironment": "development",
+  "global": {
+    "teamName": "",
+    "projectName": "",
+    "configVersion": "1.0",
+    "conflictResolution": {
+      "defaultStrategy": "manual",
+      "autoResolveTimestampConflicts": false,
+      "allowForceApply": false,
+      "requireApprovalFor": [
+        "destructive",
+        "outoforder"
+      ]
+    },
+    "notifications": {
+      "enableSlackNotifications": false,
+      "slackWebhookUrl": null,
+      "enableEmailNotifications": false,
+      "notificationRecipients": [],
+      "notifyOnEvents": [
+        "migration_failed",
+        "conflicts_detected"
+      ]
+    }
+  }
+}

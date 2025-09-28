@@ -1,512 +1,369 @@
-# 🚀 BorchSolutions PostgreSQL Migration Tool
+# DBMigrator CLI v0.5.0-beta
 
-Herramienta profesional para migraciones de bases de datos PostgreSQL diseñada para la gestión completa del ciclo de vida de esquemas y datos.
+**PostgreSQL Migration Tool - MVP 5 (Enterprise Ready)**
 
-## ✨ Características Principales
+Advanced PostgreSQL database migration tool with automatic change detection, enterprise features, and multi-database support.
 
-### 🏗️ **Gestión Completa de Migraciones**
-- ✅ Migraciones de esquema (tablas, funciones, triggers, índices)
-- ✅ Migraciones de datos maestros con scripts idempotentes
-- ✅ Generación automática de baseline desde BD existentes
-- ✅ Control de versiones y checksums de integridad
-- ✅ Transacciones automáticas con rollback
+## Features Overview
 
-### 🔧 **Control de Cambios Avanzado**
-- ✅ Tracking de archivos de migración en múltiples rutas
-- ✅ Detección automática de cambios (agregados, modificados, eliminados)
-- ✅ Control global de directorios de migración
-- ✅ Validación de integridad de archivos
+### ✅ Core Features (MVP 1-2)
+- PostgreSQL connection with validation
+- Migration history tracking with checksums
+- Apply SQL migrations with transaction safety
+- Automatic change detection and migration generation
+- Baseline management for schema snapshots
+- Schema comparison and diff reports
+- Rollback support with DOWN scripts
+- Multi-environment configuration
 
-### 🌐 **Multi-Base de Datos**
-- ✅ Soporte para múltiples conexiones simultáneas
-- ✅ Configuración centralizada de ambientes (Dev, Staging, Prod)
-- ✅ Ejecución paralela o secuencial según necesidades
+### ✅ Team Collaboration (MVP 3)
+- **Dry Run Mode** - Simulate migrations without applying
+- **Conflict Detection** - Detect and resolve migration conflicts
+- **Migration Listing** - Advanced filtering (applied/pending)
+- **Configuration Management** - Multi-environment setup
 
-### 🛡️ **Seguridad y Robustez**
-- ✅ Validaciones de permisos antes de ejecutar
-- ✅ Modo dry-run para verificación previa
-- ✅ Logging detallado con diferentes niveles
-- ✅ Manejo de errores con contexto completo
+### ✅ Production Ready (MVP 4)
+- **SQL Validation** - Syntax checking and security validation
+- **Backup Management** - Automated backups before migrations
+- **Repair Tools** - Fix checksums, locks, and recovery
+- **Migration Verification** - Integrity checks and validation
 
----
+### ✅ Enterprise Ready (MVP 5)
+- **Multi-Database Clusters** - Manage multiple databases simultaneously
+- **Performance Metrics** - Monitoring and performance tracking
+- **Deployment Orchestration** - Automated deployment pipelines
+- **Interactive Shell** - Command-line interface with autocomplete
+- **Advanced Logging** - Structured logging with different levels
 
-## 📋 Requisitos
+## Prerequisites
 
-- **.NET 8.0** o superior
-- **PostgreSQL 12+**
-- Permisos de **CREATE**, **INSERT**, **UPDATE** en la base de datos objetivo
+- .NET 8.0
+- PostgreSQL 13+
 
----
-
-## ⚙️ Instalación y Configuración
-
-### 1. **Configurar Connection Strings**
-
-Editar `appsettings.json`:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=your_db;Port=5432;User Id=user;Password=pass;",
-    "TargetDatabases": {
-      "Development": "Server=localhost;Database=dev_db;Port=5432;User Id=dev_user;Password=dev_pass;",
-      "Staging": "Server=staging-server;Database=staging_db;Port=5432;User Id=staging_user;Password=staging_pass;",
-      "Production": "Server=prod-server;Database=prod_db;Port=5432;User Id=prod_user;Password=prod_pass;"
-    }
-  },
-  "MigrationSettings": {
-    "SchemaTable": "borchsolutions_schema_migrations",
-    "DataTable": "borchsolutions_data_migrations",
-    "MigrationsPath": "Migrations",
-    "SchemaPath": "Schema",
-    "DataPath": "Data",
-    "EnableTransactions": true,
-    "EnableBackups": true,
-    "CommandTimeout": 300
-  }
-}
-```
-
-### 2. **Instalar y Compilar**
+## Installation
 
 ```bash
-dotnet restore
+cd src/DBMigrator.CLI
 dotnet build
 ```
 
-### 3. **Inicializar Motor de Migraciones**
+## Quick Start
 
+### 1. Configuration
+
+Option A - Environment Variable:
 ```bash
-dotnet run init
+export DB_CONNECTION="Host=localhost;Database=myapp;Username=dev;Password=pass"
 ```
 
----
-
-## 🎯 Comandos Disponibles
-
-### **🔧 Inicialización**
-
-```bash
-# Inicializar motor de migraciones (crear tablas de control)
-dotnet run init [--connection <name>]
-```
-
-### **📊 Información y Estado**
-
-```bash
-# Mostrar información de conexiones disponibles
-dotnet run info [--connection <name>] [--verbose]
-
-# Ver estado de migraciones
-dotnet run status [--connection <name>] [--verbose]
-
-# Validar integridad de migraciones ejecutadas
-dotnet run validate [--connection <name>]
-```
-
-### **🏗️ Baseline (Para Bases de Datos Existentes)**
-
-```bash
-# Generar baseline desde BD existente
-dotnet run baseline generate [--connection <name>] [--output <path>]
-
-# Marcar BD actual como baseline ejecutado
-dotnet run baseline mark [--connection <name>]
-```
-
-### **🚀 Ejecutar Migraciones**
-
-```bash
-# Ejecutar migraciones pendientes
-dotnet run migrate [--connection <name>] [--dry-run] [--verbose]
-
-# Solo verificar migraciones pendientes (sin ejecutar)
-dotnet run migrate --dry-run [--connection <name>]
-```
-
-### **🗃️ Gestión de Datos**
-
-```bash
-# Extraer datos de tablas específicas
-dotnet run data extract --tables "table1,table2,table3" [--output <path>] [--connection <name>] [--mark-as-executed]
-
-# Verificar existencia y contenido de tablas
-dotnet run data test --tables "table1,table2" [--connection <name>]
-```
-
-**Parámetro `--mark-as-executed`**: Cuando se especifica, el script extraído se registra automáticamente como ejecutado en la tabla `borchsolutions_data_migrations`. Esto es útil para bases de datos existentes donde los datos ya están presentes y no necesitas ejecutar el script, pero sí registrar que esa migración "conceptualmente" ya se aplicó.
-
-### **📁 Control de Cambios**
-
-```bash
-# Inicializar control de cambios en directorio
-dotnet run control init --path "/path/to/migrations"
-
-# Escanear cambios en directorio controlado
-dotnet run control scan --path "/path/to/migrations" [--verbose]
-
-# Listar todos los directorios bajo control
-dotnet run control list [--verbose]
-
-# Remover directorio del control
-dotnet run control remove --path "/path/to/migrations"
-```
-
----
-
-## 📁 Estructura de Proyecto
-
-```
-BorchSolutions.PostgreSQL.Migration/
-├── 📁 Migrations/
-│   ├── 📁 Schema/                    # Scripts de estructura
-│   │   ├── V001_001__Create_Users_Table.sql
-│   │   ├── V001_002__Add_Index_Users_Email.sql
-│   │   └── V002_001__Create_Products_Table.sql
-│   └── 📁 Data/                     # Scripts de datos
-│       ├── D001_001__Initial_User_Roles.sql
-│       ├── D001_002__Countries_Data.sql
-│       └── D002_001__Product_Categories.sql
-├── 📁 Backups/                      # Backups automáticos (opcional)
-├── appsettings.json                 # Configuración
-└── .borchsolutions-migration-control # Control de cambios (auto-generado)
-```
-
-### **Convenciones de Naming**
-
-#### Scripts de Estructura:
-```
-V{Major}_{Minor}__{Description}.sql
-
-Ejemplos:
-V001_001__Create_Users_Table.sql
-V001_002__Add_Index_Users_Email.sql
-V002_001__Add_Notifications_Feature.sql
-```
-
-#### Scripts de Datos:
-```
-D{Major}_{Minor}__{Description}.sql
-
-Ejemplos:
-D001_001__Initial_User_Roles.sql
-D001_002__Countries_Data.sql
-D002_001__Product_Categories.sql
-```
-
----
-
-## 🎯 Flujos de Trabajo Típicos
-
-### **🆕 Para Proyecto Nuevo (Base de Datos Vacía)**
-
-```bash
-# 1. Inicializar motor
-dotnet run init
-
-# 2. Crear scripts de estructura en Migrations/Schema/
-# Ejemplo: V001_001__Create_Initial_Tables.sql
-
-# 3. Crear scripts de datos en Migrations/Data/
-# Ejemplo: D001_001__Initial_Master_Data.sql
-
-# 4. Verificar migraciones pendientes
-dotnet run status
-
-# 5. Ejecutar migraciones
-dotnet run migrate
-```
-
-### **🔄 Para Base de Datos Existente**
-
-```bash
-# 1. Inicializar motor
-dotnet run init
-
-# 2. Generar baseline desde BD existente
-dotnet run baseline generate --output "Migrations/Schema/V000_001__Initial_Baseline.sql"
-
-# 3. Marcar baseline como ejecutado
-dotnet run baseline mark
-
-# 4. Extraer datos maestros existentes Y marcarlos como ejecutados
-dotnet run data extract --tables "roles,permissions,countries" --output "Migrations/Data/D000_001__Existing_Data.sql" --mark-as-executed
-
-# 5. A partir de aquí, workflow normal para nuevos cambios
-dotnet run migrate --dry-run
-```
-
-### **🔄 Desarrollo Continuo**
-
-```bash
-# 1. Crear nuevos scripts cuando sea necesario
-# V002_001__Add_New_Feature.sql
-# D002_001__New_Master_Data.sql
-
-# 2. Verificar qué está pendiente
-dotnet run status
-
-# 3. Ejecutar migraciones
-dotnet run migrate --dry-run  # Verificar primero
-dotnet run migrate             # Ejecutar
-
-# 4. Validar integridad
-dotnet run validate
-```
-
-### **🚀 Deploy a Producción**
-
-```bash
-# 1. Verificar estado actual
-dotnet run status --connection Production
-
-# 2. Dry run para confirmar cambios
-dotnet run migrate --connection Production --dry-run
-
-# 3. Ejecutar migraciones reales
-dotnet run migrate --connection Production
-
-# 4. Validar resultado
-dotnet run validate --connection Production
-```
-
----
-
-## 💡 Ejemplos Prácticos
-
-### **📋 Ejemplo: Script de Estructura**
-
-`Migrations/Schema/V001_001__Create_Users_Table.sql`:
-
-```sql
--- Crear tabla de usuarios
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    is_email_verified BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- Índices para optimización
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_verified ON users(is_email_verified) 
-WHERE is_email_verified = true;
-```
-
-### **🗂️ Ejemplo: Script de Datos**
-
-`Migrations/Data/D001_001__User_Roles.sql`:
-
-```sql
--- Insertar roles básicos del sistema
-INSERT INTO user_roles (id, name, description, is_system_role, created_at) 
-VALUES 
-    (1, 'SuperAdmin', 'Administrador del sistema con acceso completo', true, NOW()),
-    (2, 'Admin', 'Administrador con permisos de gestión', true, NOW()),
-    (3, 'User', 'Usuario estándar del sistema', true, NOW()),
-    (4, 'Guest', 'Usuario invitado con permisos limitados', true, NOW())
-ON CONFLICT (id) DO UPDATE SET
-    name = EXCLUDED.name,
-    description = EXCLUDED.description,
-    updated_at = NOW();
-
--- Resetear la secuencia si es necesario
-SELECT SETVAL('user_roles_id_seq', COALESCE((SELECT MAX(id) FROM user_roles), 1));
-```
-
----
-
-## 🔧 Control de Cambios Avanzado
-
-### **Inicializar Control en Directorio**
-
-```bash
-# Inicializar control de cambios
-dotnet run control init --path "/path/to/migrations"
-
-# El sistema creará:
-# - Archivo .borchsolutions-migration-control en el directorio
-# - Registro en ~/.borchsolutions/migration-control.json
-```
-
-### **Detectar Cambios**
-
-```bash
-# Escanear cambios en directorio
-dotnet run control scan --path "/path/to/migrations" --verbose
-
-# Salida esperada:
-# 📊 Resumen de cambios:
-#   ➕ Agregados: 2
-#   📝 Modificados: 1
-#   🗑️  Eliminados: 0
-#   ✅ Sin cambios: 15
-```
-
-### **Gestión Multi-Proyecto**
-
-```bash
-# Listar todos los proyectos bajo control
-dotnet run control list --verbose
-
-# 📋 Directorios bajo control de cambios:
-# 📁 /proyecto1/migrations
-#    Archivos: 23
-#    Último escaneo: 2025-08-28 15:30:00
-#    Estado: ✅ Íntegro
-# 
-# 📁 /proyecto2/migrations  
-#    Archivos: 45
-#    Último escaneo: 2025-08-28 14:20:00
-#    Estado: ⚠️  Con cambios
-```
-
----
-
-## 🛡️ Mejores Prácticas
-
-### **✅ Recomendaciones**
-- ✅ Siempre usar `--dry-run` antes de ejecutar en producción
-- ✅ Mantener scripts idempotentes con `ON CONFLICT` 
-- ✅ Probar migraciones en ambiente de staging primero
-- ✅ Usar control de cambios para detectar modificaciones no autorizadas
-- ✅ Validar integridad regularmente con `dotnet run validate`
-- ✅ Hacer backup antes de migraciones importantes
-- ✅ Separar claramente estructura de datos maestros
-
-### **❌ Evitar**
-- ❌ Modificar scripts ya ejecutados
-- ❌ Usar `DROP TABLE` sin verificaciones extensas
-- ❌ Scripts sin `WHERE` en `DELETE/UPDATE` masivos
-- ❌ Hardcodear IDs sin `ON CONFLICT`
-- ❌ Ejecutar en producción sin dry-run previo
-
----
-
-## 🧪 Testing y Validación
-
-### **Verificación Rápida de Tablas**
-
-```bash
-# Verificar existencia y contenido
-dotnet run data test --tables "users,roles,permissions"
-
-# Salida:
-# 🧪 Verificando 3 tablas para conexión: Default
-#   ✅ users: 1,247 registros
-#   ✅ roles: 4 registros  
-#   ✅ permissions: 23 registros
-# ✅ Verificación completada
-```
-
-### **Extracción de Datos con Registro**
-
-```bash
-# Extraer datos y marcar como ejecutado (para BD existentes)
-dotnet run data extract --tables "roles,permissions" --output "Migrations/Data/D000_001__Master_Data.sql" --mark-as-executed
-
-# Salida esperada:
-# 🗃️  Extrayendo datos de 2 tablas para conexión: Default
-# 📋 Tablas: roles, permissions
-# 💾 Datos exportados a: Migrations/Data/D000_001__Master_Data.sql
-# ✅ Script de datos marcado como ejecutado en la base de datos
-# ✅ Extracción de datos completada
-```
-
-### **Validación de Integridad**
-
-```bash
-# Validar checksums y consistencia
-dotnet run validate --verbose
-
-# Verifica:
-# - Checksums de scripts vs registros en BD
-# - Versiones duplicadas
-# - Referencias faltantes
-```
-
----
-
-## 📚 Referencia Rápida de Comandos
-
-```bash
-# INICIALIZACIÓN
-dotnet run init                                         # Inicializar motor de migraciones
-
-# INFORMACIÓN
-dotnet run info --verbose                              # Mostrar conexiones y estado de BD
-dotnet run status --connection Production             # Estado de migraciones por conexión
-
-# BASELINE  
-dotnet run baseline generate --output baseline.sql    # Generar baseline desde BD existente
-dotnet run baseline mark                               # Marcar BD como baseline
-
-# MIGRACIONES
-dotnet run migrate --dry-run                          # Verificar migraciones pendientes  
-dotnet run migrate --connection Staging               # Ejecutar migraciones en Staging
-
-# DATOS
-dotnet run data extract --tables "tabla1,tabla2" --mark-as-executed     # Extraer y registrar datos de tablas
-dotnet run data test --tables "tabla1,tabla2"                           # Verificar tablas
-
-# CONTROL DE CAMBIOS
-dotnet run control init --path "./Migrations"         # Inicializar control
-dotnet run control scan --path "./Migrations"         # Escanear cambios
-dotnet run control list --verbose                     # Listar paths controlados
-
-# VALIDACIÓN
-dotnet run validate --connection Production           # Validar integridad
-```
-
----
-
-## 🤝 Soporte
-
-### **Logs Detallados**
-Usar `--verbose` en cualquier comando para información detallada de ejecución.
-
-### **Configuración de Logging**
-En `appsettings.json`:
+Option B - Configuration File (`dbmigrator.json`):
 ```json
 {
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "BorchSolutions": "Debug"
-    }
-  }
+  "connectionString": "Host=localhost;Database=myapp;Username=dev;Password=pass",
+  "migrationsPath": "./migrations",
+  "environment": "development",
+  "schema": "public"
 }
 ```
 
-### **Troubleshooting Común**
-- **Error de conexión**: Verificar connection string y permisos
-- **Scripts no encontrados**: Verificar estructura de directorios
-- **Error de permisos**: Usuario BD debe tener permisos CREATE/INSERT/UPDATE
+### 2. Initialize and Create Baseline
 
----
+```bash
+# Initialize migration system
+dotnet run -- init
 
-## 📄 Licencia
+# Create baseline snapshot of current schema
+dotnet run -- baseline create
+```
 
-© 2025 **BorchSolutions**. Todos los derechos reservados.
+### 3. Auto-Generate Migrations
 
----
+```bash
+# Make changes to your database (via pgAdmin, psql, etc.)
+# Then detect and generate migration:
+dotnet run -- create --auto
+```
 
-## 🎉 ¡Listo para Usar!
+### 4. Apply Migrations
 
-Con **BorchSolutions PostgreSQL Migration Tool** tienes control total sobre la evolución de tu base de datos, con:
+```bash
+# Apply generated migrations
+dotnet run -- apply ./migrations/[generated-file].up.sql
+```
 
-- 🚀 **Migraciones automatizadas** de esquema y datos
-- 🔍 **Control de cambios** en tiempo real  
-- 🛡️ **Validaciones de integridad** continuas
-- 🌐 **Soporte multi-base** de datos
-- 📊 **Reportes detallados** de estado
+## Commands Reference
 
-**¡Happy coding!** ✨
+### Core Commands
+- `init` - Initialize migration history table
+- `apply <file.sql>` - Apply a migration file
+- `status` - Show applied migrations
+- `create [--auto] [--name <name>]` - Create migration (auto-detect or manual)
+- `baseline <action>` - Manage baseline (create, show)
+- `diff` - Show differences between baseline and current schema
+- `down [--count <n>]` - Rollback n migrations
 
----
+### Team Collaboration (MVP 3)
+- `dry-run <file.sql>` - Simulate migration without applying
+- `check-conflicts` - Detect migration conflicts
+- `list [--applied|--pending]` - List migrations with filtering
+- `config <action>` - Manage configuration (init, show, env)
 
-*Versión: 1.0.0 | Compatibilidad: .NET 8.0+ / PostgreSQL 12+ | Última actualización: Agosto 2025*
+### Production Ready (MVP 4)
+- `validate [file.sql]` - Validate SQL syntax and safety
+- `backup <action>` - Create and manage database backups (create, list, cleanup)
+- `repair <action>` - Repair checksums, locks, and recover
+- `verify <action>` - Verify migration integrity
+
+### Enterprise Ready (MVP 5)
+- `cluster <action>` - Multi-database cluster management (register, list, health, apply, status)
+- `metrics <action>` - Performance monitoring and metrics (show, system, export, clear)
+- `deploy <action>` - Automated deployment orchestration (plan, execute, validate, status, rollback)
+- `interactive` / `shell` - Start interactive shell mode
+
+### Global Options
+- `--env <environment>` - Use specific environment configuration
+- `--help`, `-h` - Show help message
+
+## Workflow Examples
+
+### Auto-Detection Workflow
+```bash
+# Setup
+export DB_CONNECTION="Host=localhost;Database=testdb;Username=postgres"
+dotnet run -- init
+dotnet run -- baseline create
+
+# Make database changes via SQL client:
+# CREATE TABLE products (id SERIAL PRIMARY KEY, name VARCHAR(200));
+
+# Detect and generate migration
+dotnet run -- create --auto
+# Output: Created migration: ./migrations/20241127120000_auto_create_products.up.sql
+
+# Review changes
+dotnet run -- diff
+
+# Apply migration
+dotnet run -- apply ./migrations/20241127120000_auto_create_products.up.sql
+
+# Check status
+dotnet run -- status
+```
+
+### Manual Migration Workflow
+```bash
+# Create manual migration template
+dotnet run -- create --name "add_user_indexes"
+
+# Edit the generated file with your SQL
+# Apply when ready
+dotnet run -- apply ./migrations/[generated-file].sql
+```
+
+### Enterprise Features Workflow
+```bash
+# Dry run before applying
+dotnet run -- dry-run ./migrations/migration.sql
+
+# Validate SQL safety
+dotnet run -- validate ./migrations/migration.sql
+
+# Create backup before applying
+dotnet run -- backup create --type full
+
+# Check for conflicts
+dotnet run -- check-conflicts
+
+# Apply with verification
+dotnet run -- apply ./migrations/migration.sql
+dotnet run -- verify checksums
+```
+
+### Multi-Database Cluster Management
+```bash
+# Register databases in cluster
+dotnet run -- cluster register --name prod-db --connection "Host=prod;Database=app"
+dotnet run -- cluster register --name staging-db --connection "Host=staging;Database=app"
+
+# Apply to multiple databases
+dotnet run -- cluster apply migration.sql --databases prod-db,staging-db
+
+# Monitor cluster health
+dotnet run -- cluster health
+```
+
+### Deployment Orchestration
+```bash
+# Plan deployment
+dotnet run -- deploy plan --name release-v1.2 --strategy parallel
+
+# Execute deployment
+dotnet run -- deploy execute --plan release-v1.2
+
+# Monitor metrics
+dotnet run -- metrics show
+```
+
+### Rollback Workflow
+```bash
+# Rollback last migration
+dotnet run -- down
+
+# Rollback multiple migrations
+dotnet run -- down --count 3
+
+# Emergency rollback via deployment
+dotnet run -- deploy rollback --plan release-v1.2
+```
+
+## Architecture (Enterprise Ready)
+
+```
+src/
+├── DBMigrator.CLI/              # CLI application
+│   ├── Commands/                # All command implementations
+│   │   ├── InitCommand.cs       # Initialize migration system
+│   │   ├── ApplyCommand.cs      # Apply migrations
+│   │   ├── StatusCommand.cs     # Show migration status
+│   │   ├── CreateCommand.cs     # Migration creation with auto-detection
+│   │   ├── BaselineCommand.cs   # Baseline management
+│   │   ├── DiffCommand.cs       # Schema comparison
+│   │   ├── DownCommand.cs       # Rollback support
+│   │   ├── DryRunCommand.cs     # MVP 3: Simulation mode
+│   │   ├── CheckConflictsCommand.cs # MVP 3: Conflict detection
+│   │   ├── ListCommand.cs       # MVP 3: Migration listing
+│   │   ├── ConfigCommand.cs     # MVP 3: Configuration management
+│   │   ├── ValidateCommand.cs   # MVP 4: SQL validation
+│   │   ├── BackupCommand.cs     # MVP 4: Backup management
+│   │   ├── RepairCommand.cs     # MVP 4: Repair tools
+│   │   ├── VerifyCommand.cs     # MVP 4: Verification
+│   │   ├── ClusterCommand.cs    # MVP 5: Multi-DB cluster management
+│   │   ├── MetricsCommand.cs    # MVP 5: Performance metrics
+│   │   └── DeployCommand.cs     # MVP 5: Deployment orchestration
+│   ├── Interactive/             # MVP 5: Interactive shell
+│   │   └── InteractiveShell.cs
+│   └── Program.cs               # Main CLI entry point
+└── DBMigrator.Core/            # Core functionality
+    ├── Models/                 # Data models
+    │   ├── Migration.cs        # Migration representation
+    │   ├── GeneratedMigration.cs # Auto-generated migrations
+    │   ├── Configuration.cs    # Configuration models
+    │   ├── DryRun/            # Dry run results
+    │   ├── Schema/            # Schema representation (Tables, Columns, Indexes, Functions)
+    │   ├── Changes/           # Change detection (TableChanges, ColumnChange, DatabaseChanges)
+    │   ├── Conflicts/         # Conflict detection models
+    │   └── Configuration/     # Configuration management
+    ├── Services/              # Core services
+    │   ├── MigrationService.cs      # Core migration logic with validation
+    │   ├── SchemaAnalyzer.cs        # Schema analysis
+    │   ├── ChangeDetector.cs        # Change detection
+    │   ├── MigrationGenerator.cs    # SQL generation
+    │   ├── ConfigurationManager.cs  # Multi-environment config
+    │   ├── ConflictDetector.cs      # MVP 3: Conflict detection
+    │   ├── DryRunExecutor.cs        # MVP 3: Simulation
+    │   ├── MigrationValidator.cs    # MVP 4: SQL validation
+    │   ├── BackupManager.cs         # MVP 4: Backup management
+    │   ├── ChecksumManager.cs       # MVP 4: Integrity verification
+    │   ├── MigrationLockManager.cs  # MVP 4: Concurrent access control
+    │   ├── DeploymentManager.cs     # MVP 5: Deployment orchestration
+    │   ├── MultiDatabaseManager.cs  # MVP 5: Cluster management
+    │   ├── MetricsCollector.cs      # MVP 5: Performance monitoring
+    │   ├── TransactionManager.cs    # Transaction safety
+    │   ├── ConnectionStringValidator.cs # Connection validation
+    │   ├── ColumnChangeDetector.cs  # Advanced change detection
+    │   ├── AlterTableGenerator.cs   # DDL generation
+    │   └── StructuredLogger.cs      # Advanced logging
+    └── Database/              # Database access
+        └── ConnectionManager.cs     # PostgreSQL connection management
+```
+
+## Generated Migration Structure
+
+```
+./migrations/
+├── .baseline.json                           # Schema baseline
+├── 20241127120000_auto_create_products.up.sql    # UP script
+├── 20241127120000_auto_create_products.down.sql  # DOWN script
+└── 20241127121500_manual_add_indexes.sql         # Manual migration
+```
+
+## Configuration Options
+
+### dbmigrator.json
+```json
+{
+  "connectionString": "",                    // DB connection (env var override)
+  "migrationsPath": "./migrations",          // Migration files location
+  "environment": "development",              // Environment name
+  "schema": "public",                        // Database schema
+  "autoGenerateDown": true,                  // Generate DOWN scripts
+  "createBackupBeforeMigration": true,       // Auto-backup before apply
+  "backupPath": "./backups",                 // Backup location
+  "commandTimeout": 30,                      // SQL command timeout
+  "verboseOutput": false                     // Verbose logging
+}
+```
+
+### Environment Variables
+- `DB_CONNECTION` - PostgreSQL connection string (overrides config)
+- `MIGRATOR_ENVIRONMENT` - Environment name
+- `MIGRATOR_MIGRATIONS_PATH` - Migrations directory
+- `MIGRATOR_SCHEMA` - Database schema name
+- `MIGRATOR_LOG_LEVEL` - Logging level (Debug, Info, Warning, Error)
+- `MIGRATOR_BACKUP_PATH` - Backup directory path
+- `MIGRATOR_COMMAND_TIMEOUT` - SQL command timeout in seconds
+
+## Troubleshooting
+
+### No baseline found
+```bash
+# Error: No baseline found. Create one with 'dbmigrator baseline create'
+dotnet run -- baseline create
+```
+
+### Connection issues
+```bash
+# Test connection
+dotnet run -- status
+```
+
+### View current differences
+```bash
+# See what changes would be detected
+dotnet run -- diff
+```
+
+## Enterprise Features Implemented
+
+### 🔧 Advanced Management
+- **Multi-Database Clusters** - Manage multiple PostgreSQL instances simultaneously
+- **Deployment Orchestration** - Automated deployment pipelines with rollback support
+- **Performance Monitoring** - Built-in metrics collection and analysis
+- **Interactive Shell** - Advanced CLI with autocomplete and help
+
+### 🛡️ Production Safety
+- **SQL Security Validation** - Detects potentially dangerous SQL patterns
+- **Transaction Safety** - All migrations run in transactions with proper rollback
+- **Checksum Verification** - Ensures migration integrity and detects tampering
+- **Backup Integration** - Automated backups before applying migrations
+
+### 👥 Team Collaboration
+- **Conflict Detection** - Identifies conflicting migrations across team members
+- **Dry Run Mode** - Simulate migrations without applying changes
+- **Environment Management** - Support for dev/staging/production configurations
+- **Structured Logging** - Detailed logging for debugging and auditing
+
+### 🔍 Schema Analysis
+- **Auto-Detection** - Automatically detects tables, columns, indexes, and functions
+- **Smart Generation** - Creates both UP and DOWN migration scripts
+- **Change Detection** - Identifies schema differences with precision
+- **Visual Diffs** - Clear reporting of schema changes
+
+## Dependencies & Technology Stack
+
+- **.NET 8.0** - Modern C# with latest features
+- **Npgsql 8.0.4** - PostgreSQL .NET driver
+- **Microsoft.Extensions.Configuration** - Configuration management
+- **System.Text.Json** - JSON serialization
+- **SHA256 Checksums** - Migration integrity verification
+- **Structured Logging** - Advanced logging capabilities
