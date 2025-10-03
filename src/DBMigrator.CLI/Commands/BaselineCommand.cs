@@ -10,17 +10,17 @@ public class BaselineCommand
         try
         {
             var connectionManager = new ConnectionManager(connectionString);
-            var schemaAnalyzer = new SchemaAnalyzer(connectionManager);
-            var configService = new ConfigurationService();
+            var configurationManager = new ConfigurationManager();
+            var schemaAnalyzer = new SchemaAnalyzer(connectionManager, configurationManager);
 
             switch (action.ToLower())
             {
                 case "create":
-                    return await CreateBaselineAsync(schemaAnalyzer, configService, migrationsPath, baselineName);
-                
+                    return await CreateBaselineAsync(schemaAnalyzer, migrationsPath, baselineName);
+
                 case "show":
-                    return await ShowBaselineAsync(configService, migrationsPath);
-                
+                    return await ShowBaselineAsync(schemaAnalyzer, migrationsPath);
+
                 default:
                     Console.WriteLine("❌ Unknown baseline action. Use: create, show");
                     return 1;
@@ -33,29 +33,29 @@ public class BaselineCommand
         }
     }
 
-    private static async Task<int> CreateBaselineAsync(SchemaAnalyzer analyzer, ConfigurationService configService, string migrationsPath, string? name)
+    private static async Task<int> CreateBaselineAsync(SchemaAnalyzer analyzer, string migrationsPath, string? name)
     {
         Console.WriteLine("📸 Creating baseline snapshot...");
-        
+
         var schema = await analyzer.GetCurrentSchemaAsync();
-        await configService.SaveBaselineAsync(schema, migrationsPath);
-        
+        await analyzer.SaveBaselineAsync(schema, migrationsPath);
+
         var tableCount = schema.Tables.Count;
         var columnCount = schema.Tables.Sum(t => t.Columns.Count);
         var indexCount = schema.Tables.Sum(t => t.Indexes.Count);
-        
+
         Console.WriteLine($"✅ Baseline created successfully!");
         Console.WriteLine($"   📊 Captured: {tableCount} tables, {columnCount} columns, {indexCount} indexes");
         Console.WriteLine($"   📁 Saved to: {Path.Combine(migrationsPath, ".baseline.json")}");
         Console.WriteLine($"   ⏰ Timestamp: {schema.CapturedAt:yyyy-MM-dd HH:mm:ss} UTC");
-        
+
         return 0;
     }
 
-    private static async Task<int> ShowBaselineAsync(ConfigurationService configService, string migrationsPath)
+    private static async Task<int> ShowBaselineAsync(SchemaAnalyzer analyzer, string migrationsPath)
     {
-        var baseline = await configService.LoadBaselineAsync(migrationsPath);
-        
+        var baseline = await analyzer.LoadBaselineAsync(migrationsPath);
+
         if (baseline == null)
         {
             Console.WriteLine("❌ No baseline found. Create one with 'dbmigrator baseline create'");
@@ -76,7 +76,7 @@ public class BaselineCommand
                 var columnCount = table.Columns.Count;
                 var indexCount = table.Indexes.Count(i => !i.IsPrimary);
                 var pkCount = table.Indexes.Count(i => i.IsPrimary);
-                
+
                 Console.WriteLine($"   • {table.Name} ({columnCount} columns, {indexCount} indexes{(pkCount > 0 ? ", PK" : "")})");
             }
         }

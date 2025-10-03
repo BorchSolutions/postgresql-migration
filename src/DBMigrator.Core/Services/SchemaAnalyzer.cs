@@ -1,4 +1,6 @@
+using System.Text.Json;
 using DBMigrator.Core.Database;
+using DBMigrator.Core.Models;
 using DBMigrator.Core.Models.Schema;
 using Npgsql;
 using Schema = DBMigrator.Core.Models.Schema;
@@ -8,10 +10,13 @@ namespace DBMigrator.Core.Services;
 public class SchemaAnalyzer
 {
     private readonly ConnectionManager _connectionManager;
+    private readonly ConfigurationManager _configurationManager;
+    private const string BaselineFileName = ".baseline.json";
 
-    public SchemaAnalyzer(ConnectionManager connectionManager)
+    public SchemaAnalyzer(ConnectionManager connectionManager, ConfigurationManager configurationManager)
     {
         _connectionManager = connectionManager;
+        _configurationManager = configurationManager;
     }
 
     public async Task<DatabaseSchema> GetCurrentSchemaAsync(string schemaName = "public")
@@ -452,6 +457,66 @@ public class SchemaAnalyzer
         {
             Console.WriteLine($"Warning: Failed to read column '{columnName}': {ex.Message}");
             return "";
+        }
+    }
+
+    public async Task SaveBaselineAsync(DatabaseSchema schema, string? migrationsPath = null)
+    {
+        var basePath = migrationsPath;
+        if (string.IsNullOrEmpty(basePath))
+        {
+            var config = await _configurationManager.LoadConfigurationAsync();
+            basePath = config.MigrationsPath;
+        }
+
+        var baselinePath = Path.Combine(basePath, BaselineFileName);
+
+        Directory.CreateDirectory(basePath);
+
+        try
+        {
+            var json = JsonSerializer.Serialize(schema, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            });
+
+            await File.WriteAllTextAsync(baselinePath, json);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to save baseline to {baselinePath}: {ex.Message}", ex);
+        }
+    }
+
+    public async Task<DatabaseSchema?> LoadBaselineAsync(string? migrationsPath = null)
+    {
+        var basePath = migrationsPath;
+        if (string.IsNullOrEmpty(basePath))
+        {
+            var config = await _configurationManager.LoadConfigurationAsync();
+            basePath = config.MigrationsPath;
+        }
+
+        var baselinePath = Path.Combine(basePath, BaselineFileName);
+
+        if (!File.Exists(baselinePath))
+        {
+            return null;
+        }
+
+        try
+        {
+            var json = await File.ReadAllTextAsync(baselinePath);
+            return JsonSerializer.Deserialize<DatabaseSchema>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            });
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to load baseline from {baselinePath}: {ex.Message}", ex);
         }
     }
 }

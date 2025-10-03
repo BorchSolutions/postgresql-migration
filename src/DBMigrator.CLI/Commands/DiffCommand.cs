@@ -10,14 +10,14 @@ public class DiffCommand
         try
         {
             var connectionManager = new ConnectionManager(connectionString);
-            var schemaAnalyzer = new SchemaAnalyzer(connectionManager);
+            var configurationManager = new ConfigurationManager();
+            var schemaAnalyzer = new SchemaAnalyzer(connectionManager, configurationManager);
             var changeDetector = new ChangeDetector();
-            var configService = new ConfigurationService();
 
             Console.WriteLine("🔍 Analyzing differences...");
 
             // Load baseline
-            var baseline = await configService.LoadBaselineAsync(migrationsPath);
+            var baseline = await schemaAnalyzer.LoadBaselineAsync(migrationsPath);
             if (baseline == null)
             {
                 Console.WriteLine("❌ No baseline found. Create one with 'dbmigrator baseline create'");

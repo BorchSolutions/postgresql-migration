@@ -575,8 +575,9 @@ public class InteractiveShell
                 Console.WriteLine("🔍 Auto-detecting changes...");
                 
                 // Check if baseline exists first
-                var configService = new ConfigurationService();
-                var baseline = await configService.LoadBaselineAsync(_config.MigrationsPath);
+                var connectionManager = new ConnectionManager(_config.ConnectionString);
+                var schemaAnalyzer = new SchemaAnalyzer(connectionManager, _configManager);
+                var baseline = await schemaAnalyzer.LoadBaselineAsync(_config.MigrationsPath);
                 
                 if (baseline == null)
                 {

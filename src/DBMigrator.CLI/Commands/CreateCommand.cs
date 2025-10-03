@@ -11,17 +11,17 @@ public class CreateCommand
         try
         {
             var connectionManager = new ConnectionManager(connectionString);
-            var schemaAnalyzer = new SchemaAnalyzer(connectionManager);
+            var configurationManager = new ConfigurationManager();
+            var schemaAnalyzer = new SchemaAnalyzer(connectionManager, configurationManager);
             var changeDetector = new ChangeDetector();
             var migrationGenerator = new MigrationGenerator();
-            var configService = new ConfigurationService();
 
             if (autoDetect)
             {
                 Console.WriteLine("🔍 Auto-detecting changes...");
                 
                 // Load baseline schema
-                var baseline = await configService.LoadBaselineAsync(migrationsPath);
+                var baseline = await schemaAnalyzer.LoadBaselineAsync(migrationsPath);
                 if (baseline == null)
                 {
                     Console.WriteLine("❌ No baseline found. Run 'dbmigrator baseline create' first.");
